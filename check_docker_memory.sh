@@ -20,9 +20,9 @@ VERSION=1.0.0
 print_help () {
   echo "Usage: $SCRIPTNAME [-w <warning>] [-c <critical>]"
   echo ""
-  echo "This plugin checks memory consumption for running docker containers."
+  echo "This plugin checks memory consumption of running docker containers."
   echo ""
-  echo "Warn and crit thresholds could be MB or %."
+  echo "Warn and crit thresholds are MB or %."
   echo "To use a relative value append a % sign. The value is calculated using"
   echo "the cgroup memory-limit or if its not set, the available system memory."
   echo "Omit -w and -c to return OK for every value"
@@ -74,7 +74,7 @@ while [[ $# > 0 ]]; do
       shift
     ;;
     *)
-      >&2 echo "Ignoring unknowen option $key"
+      >&2 echo "Ignoring unknown option $key"
     ;;
   esac
   shift # past argument or value
@@ -100,7 +100,7 @@ fi
 
 EXIT_STATE=$STATE_OK
 
-function setExistState() {
+function setExitState() {
   if [ $1 -gt $EXIT_STATE ]; then
     [ $1 -eq $STATE_UNKNOWN ] && [ $EXIT_STATE -ne $STATE_OK ] && return
     EXIT_STATE=$1
@@ -121,7 +121,7 @@ for CID in $CIDS; do
 
   if [ "$LIMIT" == "" ] || [ "$USAGE" == "" ] ; then
     >&2 echo "Error: Could not read cgroup values for $CNAME. Is the container running and cgroup_enable=memory?"
-    setExistState $STATE_UNKNOWN
+    setExitState $STATE_UNKNOWN
     continue;
   fi
 
@@ -156,10 +156,10 @@ for CID in $CIDS; do
 
   if [ -n "$CRIT" ] && [ "$USAGE_MB" -gt "$CRIT_VAL" ] ; then
     RESULT="CRITICAL ${RES}${RESULT}"
-    setExistState $STATE_CRITICAL
+    setExitState $STATE_CRITICAL
   elif [ -n "$WARN" ] && [ "$USAGE_MB" -gt "$WARN_VAL" ] ; then
     RESULT="${RESULT}WARNING ${RES}"
-    setExistState $STATE_WARNING
+    setExitState $STATE_WARNING
   fi
 
   PERFDATA="$PERFDATA $CNAME=${USAGE_MB}MB;$WARN_VAL;$CRIT_VAL;0;$LIMIT_MB"

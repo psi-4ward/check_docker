@@ -22,7 +22,7 @@ TMPDIR=/tmp/check_docker_net
 print_help () {
   echo "Usage: $SCRIPTNAME [-w <warning>] [-c <critical>]"
   echo ""
-  echo "This plugin checks network io for running docker containers."
+  echo "This plugin checks network io of running docker containers."
   echo ""
   echo "Warn and crit thresholds per check cycle in MB."
   echo "Omit -w and -c to return OK for every value"
@@ -80,7 +80,7 @@ while [[ $# > 0 ]]; do
       shift
     ;;
     *)
-      >&2 echo "Ignoring unknowen option $key"
+      >&2 echo "Ignoring unknown option $key"
     ;;
   esac
   shift # past argument or value
@@ -106,7 +106,7 @@ fi
 
 EXIT_STATE=$STATE_OK
 
-function setExistState() {
+function setExitState() {
   if [ $1 -gt $EXIT_STATE ]; then
     [ $1 -eq $STATE_UNKNOWN ] && [ $EXIT_STATE -ne $STATE_OK ] && return
     EXIT_STATE=$1
@@ -154,10 +154,10 @@ for CID in $CIDS; do
 
   if [ -n "$CRIT" ] && [ "$TOTAL_MB" -gt "$CRIT" ] ; then
     RESULT="CRITICAL ${CNAME}: ${TOTAL_MB}\n${RESULT}"
-    setExistState $STATE_CRITICAL
+    setExitState $STATE_CRITICAL
   elif [ -n "$WARN" ] && [ "$TOTAL_MB" -gt "$WARN" ] ; then
     RESULT="WARNING ${CNAME}: ${TOTAL_MB}\n${RESULT}"
-    setExistState $STATE_WARNING
+    setExitState $STATE_WARNING
   fi
 
   PERFDATA="$PERFDATA ${CNAME}=${RX}B;$WARN_BYTE;$CRIT_BYTE;0; ${CNAME}_RX=${RX}B;;;0; ${CNAME}_TX=${TX}B;;;0;"
