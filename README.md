@@ -63,3 +63,7 @@ $ ./check_docker_netio.sh -w 200 -c 250 -f network=public
 
 OK | nginx=47225B;209715200;262144000;0; nginx_RX=47225B;;;0; nginx_TX=18479B;;;0; psitransfer=0B;209715200;262144000;0; psitransfer_RX=0B;;;0; psitransfer_TX=0B;;;0;
 ```
+
+## check_docker_cpu
+
+Check CPU consumption of containers using jiffies
