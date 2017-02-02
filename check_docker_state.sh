@@ -81,7 +81,6 @@ while read LINE ; do
         EXIT_STATE=$STATE_CRITICAL;
         CONTAINERS_CRITICAL+=("$LINE");
       else
-        echo 2;
         if [ $EXIT_STATE == $STATE_OK ]; then
           EXIT_STATE=$STATE_WARNING;
         fi;
