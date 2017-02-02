@@ -6,6 +6,8 @@
 # Author: Christoph Wiechert <wio@psitrx.de>
 #############################################################
 
+set -e
+
 # Set States
 STATE_OK=0
 STATE_WARNING=1
@@ -58,17 +60,51 @@ done
 
 [ -n "$FILTER" ] && FILTER="-f $FILTER"
 
-EXIT_STATE=$STATE_OK
+EXIT_STATE=$STATE_OK;
+declare -a CONTAINERS_WARN;
+declare -a CONTAINERS_CRIT;
 
 while read LINE ; do
+
   STATE=$(echo $LINE | cut -d" " -f2)
   if [ "$STATE" != "Up" ] || echo $LINE | grep -qF unhealthy ; then
-    echo $LINE
     EXIT_STATE=$STATE_CRITICAL
   fi
+
+  case "$STATE" in
+    Created)
+    ;;
+    Up)
+    ;;
+    Restarting)
+      if echo $LINE | grep -qF "minutes ago"; then
+        EXIT_STATE=$STATE_CRITICAL;
+        CONTAINERS_CRITICAL+=("$LINE");
+      else
+        echo 2;
+        if [ $EXIT_STATE == $STATE_OK ]; then
+          EXIT_STATE=$STATE_WARNING;
+        fi;
+        CONTAINERS_WARN+=("$LINE");
+      fi
+    ;;
+    Exited)
+      EXIT_STATE=$STATE_CRITICAL
+      CONTAINERS_CRITICAL+=("$LINE");
+    ;;
+    *)
+     >&2 echo "unkown state "$STATE;
+  esac
 done < <(docker ps --format '{{.Names}} {{.Status}}' $FILTER)
 
 [ $EXIT_STATE == $STATE_OK ] && echo OK
+
+if [ ${#CONTAINERS_WARN[@]} -gt 0 ]; then
+  printf 'WARNING: %s\n' "${CONTAINERS_WARN[@]}"
+fi;
+if [ ${#CONTAINERS_CRITICAL[@]} -gt 0 ]; then
+  printf 'CRITICAL: %s\n' "${CONTAINERS_CRITICAL[@]}"
+fi;
 
 exit $EXIT_STATE
 
