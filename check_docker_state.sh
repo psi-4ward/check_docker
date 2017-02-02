@@ -99,11 +99,11 @@ done < <(docker ps --format '{{.Names}} {{.Status}}' $FILTER)
 
 [ $EXIT_STATE == $STATE_OK ] && echo OK
 
-if [ ${#CONTAINERS_WARN[@]} -gt 0 ]; then
-  printf 'WARNING: %s\n' "${CONTAINERS_WARN[@]}"
-fi;
 if [ ${#CONTAINERS_CRITICAL[@]} -gt 0 ]; then
   printf 'CRITICAL: %s\n' "${CONTAINERS_CRITICAL[@]}"
+fi;
+if [ ${#CONTAINERS_WARN[@]} -gt 0 ]; then
+  printf 'WARNING: %s\n' "${CONTAINERS_WARN[@]}"
 fi;
 
 exit $EXIT_STATE
