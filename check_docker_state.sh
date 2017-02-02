@@ -23,8 +23,10 @@ print_help () {
   echo ""
   echo "This plugin checks the state of running docker containers."
   echo ""
-  echo "Returns with CRIT with any container are not \"Up\""
-  echo "or \"unhealthy\""
+  echo "It returns a warning if there are any freshly restarted containers."
+  echo ""
+  echo "It returns CRIT for any container that are neither \"Up\""
+  echo "nor \"healthy\""
   echo ""
   echo "Options:"
   echo "  -h                   Prints this helpscreen"
@@ -93,6 +95,9 @@ while read LINE ; do
     ;;
     *)
      >&2 echo "unkown state "$STATE;
+     if [ $EXIT_STATE == $STATE_OK ]; then
+       EXIT_STATE=$STATE_UNKNOWN;
+     fi;
   esac
 done < <(docker ps --format '{{.Names}} {{.Status}}' $FILTER)
 
