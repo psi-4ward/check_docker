@@ -17,6 +17,8 @@ STATE_UNKNOWN=3
 SCRIPTNAME=$0
 VERSION=1.0.0
 
+EXITFILTER="ok"
+
 # Set help
 print_help () {
   echo "Usage: $SCRIPTNAME [-w <warning>] [-c <critical>]"
@@ -29,9 +31,10 @@ print_help () {
   echo "nor \"healthy\""
   echo ""
   echo "Options:"
-  echo "  -h                   Prints this helpscreen"
-  echo "  -v                   Prints the version"
-  echo "  -f <filter>          docker ps --filter value"
+  echo "  -h                     Prints this helpscreen"
+  echo "  -v                     Prints the version"
+  echo "  -e <critical|warning>  Explicitly handle exited containers. Otherwise exited containers are ignored."
+  echo "  -f <filter>            docker ps --filter value"
   echo ""
 }
 
@@ -51,6 +54,10 @@ while [[ $# > 0 ]]; do
     ;;
     -f)
       FILTER="$2"
+      shift
+    ;;
+    -e)
+      EXITFILTER="$2"
       shift
     ;;
     *)
@@ -99,8 +106,16 @@ while read LINE ; do
       fi
     ;;
     Exited)
-      EXIT_STATE=$STATE_CRITICAL
-      CONTAINERS_CRITICAL+=("$LINE");
+      if [ $EXITFILTER == "critical" ]; then
+        EXIT_STATE=$STATE_CRITICAL
+        CONTAINERS_CRITICAL+=("$LINE");
+      fi
+      if [ $EXITFILTER == "warning" ]; then
+        if [ $EXIT_STATE == $STATE_OK ]; then
+          EXIT_STATE=$STATE_WARNING;
+        fi;
+        CONTAINERS_WARN+=("$LINE");
+      fi
     ;;
     ## TODO: check if this output can really happen
     Dead)
@@ -113,7 +128,7 @@ while read LINE ; do
        EXIT_STATE=$STATE_UNKNOWN;
      fi;
   esac
-done < <(docker ps --format '{{.Names}} {{.Status}}' $FILTER)
+done < <(docker ps -a --format '{{.Names}} {{.Status}}' $FILTER)
 
 [ $EXIT_STATE == $STATE_OK ] && echo OK
 
