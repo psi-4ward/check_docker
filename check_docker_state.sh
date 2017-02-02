@@ -73,6 +73,15 @@ while read LINE ; do
     EXIT_STATE=$STATE_CRITICAL
   fi
 
+  PAUSED=$(echo $LINE | cut -d" " -f5)
+  if [ $PAUSED == '(Paused)' ] ; then
+    if [ $EXIT_STATE == $STATE_OK ]; then
+      EXIT_STATE=$STATE_WARNING;
+    fi;
+    CONTAINERS_WARN+=("$LINE");
+    continue;
+  fi
+
   case "$STATE" in
     Created)
     ;;
@@ -90,6 +99,11 @@ while read LINE ; do
       fi
     ;;
     Exited)
+      EXIT_STATE=$STATE_CRITICAL
+      CONTAINERS_CRITICAL+=("$LINE");
+    ;;
+    ## TODO: check if this output can really happen
+    Dead)
       EXIT_STATE=$STATE_CRITICAL
       CONTAINERS_CRITICAL+=("$LINE");
     ;;
