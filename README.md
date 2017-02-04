@@ -67,3 +67,20 @@ OK | nginx=47225B;209715200;262144000;0; nginx_RX=47225B;;;0; nginx_TX=18479B;;;
 ## check_docker_cpu
 
 Check CPU consumption of containers using jiffies
+
+## check_docker_state
+
+Checks state of running containers. It prints any conspicuity. If everything is fine it just prints "OK".
+ 
+### Examples
+
+```
+$ ./check_docker_state.sh
+OK
+```
+
+
+```
+$ ./check_docker_state.sh
+CRITICAL: meteor_run_2 Restarting (0) 45 minutes ago
+```
