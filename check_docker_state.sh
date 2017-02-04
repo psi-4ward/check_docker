@@ -21,7 +21,7 @@ EXITFILTER="ok"
 
 # Set help
 print_help () {
-  echo "Usage: $SCRIPTNAME [-w <warning>] [-c <critical>]"
+  echo "Usage: $SCRIPTNAME [-e <crit|warn>] [-f <filter>]"
   echo ""
   echo "This plugin checks the state of running docker containers."
   echo ""
@@ -33,7 +33,7 @@ print_help () {
   echo "Options:"
   echo "  -h                     Prints this helpscreen"
   echo "  -v                     Prints the version"
-  echo "  -e <critical|warning>  Explicitly handle exited containers. Otherwise exited containers are ignored."
+  echo "  -e <crit|warn>         Explicitly handle exited containers. Otherwise exited containers are ignored."
   echo "  -f <filter>            docker ps --filter value"
   echo ""
 }
@@ -106,11 +106,11 @@ while read LINE ; do
       fi
     ;;
     Exited)
-      if [ $EXITFILTER == "critical" ]; then
+      if [ $EXITFILTER == "crit" ]; then
         EXIT_STATE=$STATE_CRITICAL
         CONTAINERS_CRITICAL+=("$LINE");
       fi
-      if [ $EXITFILTER == "warning" ]; then
+      if [ $EXITFILTER == "warn" ]; then
         if [ $EXIT_STATE == $STATE_OK ]; then
           EXIT_STATE=$STATE_WARNING;
         fi;
